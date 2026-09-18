@@ -88,6 +88,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
             type="text"
             value={name}
             onChange={e => setName(e.target.value)}
+            placeholder="Ej. Mi Amor, Mi Cielo, Mi Rey..."
             style={{
               width: '100%',
               padding: '10px 14px',
@@ -117,6 +118,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
             type="text"
             value={partner}
             onChange={e => setPartner(e.target.value)}
+            placeholder="Ej. Mi Vida, Cariño, Mi Reina..."
             style={{
               width: '100%',
               padding: '10px 14px',

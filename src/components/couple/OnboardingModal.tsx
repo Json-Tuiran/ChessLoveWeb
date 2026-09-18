@@ -78,10 +78,10 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ onComplete }) 
         </p>
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '18px', textAlign: 'left' }}>
-          {/* User Name Input */}
+          {/* User Nickname Input */}
           <div>
             <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: 'var(--dark-on-surface)', marginBottom: '6px' }}>
-              ¿Cómo te llamas o cómo te dice tu pareja?
+              ¿Tu apodo cariñoso o cómo te dice tu pareja?
             </label>
             <input
               type="text"
@@ -89,7 +89,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ onComplete }) 
               required
               value={name}
               onChange={e => setName(e.target.value)}
-              placeholder="Ej. Jason, Valentina, Mi Cielo..."
+              placeholder="Ej. Mi Amor, Mi Cielo, Cariño, Mi Vida..."
               style={{
                 width: '100%',
                 padding: '12px 16px',
@@ -101,6 +101,29 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ onComplete }) 
                 outline: 'none',
               }}
             />
+            {/* Romantic Nickname Quick Suggestions */}
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '8px' }}>
+              {['Mi Amor', 'Mi Cielo', 'Cariño', 'Mi Vida', 'Mi Reina', 'Mi Rey'].map(apodo => (
+                <button
+                  key={apodo}
+                  type="button"
+                  onClick={() => setName(apodo)}
+                  style={{
+                    background: name === apodo ? 'var(--rose-gold-primary)' : 'rgba(255, 255, 255, 0.06)',
+                    color: name === apodo ? '#1A161E' : 'var(--rose-gold-secondary)',
+                    border: '1px solid var(--border-subtle)',
+                    borderRadius: '999px',
+                    padding: '3px 10px',
+                    fontSize: '11px',
+                    cursor: 'pointer',
+                    fontWeight: 600,
+                    transition: 'all 0.15s ease',
+                  }}
+                >
+                  {apodo}
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* Pairing Selector */}
