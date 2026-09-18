@@ -1,14 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, CheckCircle2, ChevronRight, GraduationCap } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, ChevronRight, GraduationCap, Sparkles, Trophy, Compass } from 'lucide-react';
 import { LEARN_LEVELS } from '../learn/LearnCatalog';
 import { Lesson } from '../learn/types';
 
 interface LearnScreenProps {
   onSelectLesson: (lesson: Lesson) => void;
+  onOpenBestiary: () => void;
+  onOpenMiniGames: () => void;
   onExit: () => void;
 }
 
-export const LearnScreen: React.FC<LearnScreenProps> = ({ onSelectLesson, onExit }) => {
+export const LearnScreen: React.FC<LearnScreenProps> = ({
+  onSelectLesson,
+  onOpenBestiary,
+  onOpenMiniGames,
+  onExit,
+}) => {
   const [completedIds, setCompletedIds] = useState<number[]>([]);
 
   useEffect(() => {
@@ -53,9 +60,76 @@ export const LearnScreen: React.FC<LearnScreenProps> = ({ onSelectLesson, onExit
         </span>
       </div>
 
-      <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '20px', textAlign: 'center' }}>
+      <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '16px', textAlign: 'center' }}>
         Aprende desde los pasos elementales hasta tácticas de complicidad romántica para disfrutar el ajedrez juntos.
       </p>
+
+      {/* Featured Beginner Learning Cards (Bestiary & Mini-Games) */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '22px' }}>
+        {/* El Alma de las Piezas */}
+        <div
+          onClick={onOpenBestiary}
+          className="glass-panel"
+          style={{
+            padding: '14px',
+            cursor: 'pointer',
+            border: '1px solid var(--border-gold)',
+            background: 'linear-gradient(135deg, rgba(229, 115, 136, 0.15), rgba(38, 30, 42, 0.8))',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
+            transition: 'transform 0.2s ease',
+          }}
+        >
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
+              <Compass size={18} color="var(--rose-gold-primary)" />
+              <span style={{ fontSize: '0.9rem', fontWeight: 700, color: '#FFF' }}>
+                El Alma de las Piezas
+              </span>
+            </div>
+            <p style={{ fontSize: '0.74rem', color: 'var(--text-muted)', lineHeight: 1.4 }}>
+              Movimiento geométrico, valores en corazones y práctica libre en 3D.
+            </p>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginTop: '10px', fontSize: '0.75rem', color: 'var(--rose-gold-primary)', fontWeight: 600 }}>
+            <span>Explorar piezas</span>
+            <ChevronRight size={14} />
+          </div>
+        </div>
+
+        {/* Gimnasio del Corazón (Mini-Juegos) */}
+        <div
+          onClick={onOpenMiniGames}
+          className="glass-panel"
+          style={{
+            padding: '14px',
+            cursor: 'pointer',
+            border: '1px solid var(--border-gold)',
+            background: 'linear-gradient(135deg, rgba(255, 209, 102, 0.12), rgba(38, 30, 42, 0.8))',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
+            transition: 'transform 0.2s ease',
+          }}
+        >
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
+              <Trophy size={18} color="#FFD166" />
+              <span style={{ fontSize: '0.9rem', fontWeight: 700, color: '#FFF' }}>
+                Gimnasio del Corazón
+              </span>
+            </div>
+            <p style={{ fontSize: '0.74rem', color: 'var(--text-muted)', lineHeight: 1.4 }}>
+              Mini-juegos: Cosecha de Corazones (Caballo) y Guerra de Peones.
+            </p>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginTop: '10px', fontSize: '0.75rem', color: '#FFD166', fontWeight: 600 }}>
+            <span>Entrenar ahora</span>
+            <ChevronRight size={14} />
+          </div>
+        </div>
+      </div>
 
       {/* Levels and Lessons */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>

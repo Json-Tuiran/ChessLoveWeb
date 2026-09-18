@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import confetti from 'canvas-confetti';
-import { RotateCcw, Flag, ArrowLeft, GraduationCap, Sparkles, Volume2, VolumeX, ShieldCheck } from 'lucide-react';
+import { RotateCcw, Flag, ArrowLeft, GraduationCap, Sparkles, Volume2, VolumeX, ShieldCheck, HelpCircle, Undo2, Heart } from 'lucide-react';
 import { BoardState, Move, PieceColor, Position } from '../engine/types';
 import { ChessEngine } from '../engine/ChessEngine';
 import { ChessBoard } from '../components/board/ChessBoard';
@@ -55,6 +55,13 @@ export const OnlineGameScreen: React.FC<OnlineGameScreenProps> = ({
 
   // Game over state
   const [gameOverModal, setGameOverModal] = useState<{ title: string; subtitle: string; winner?: string } | null>(null);
+
+  // Beginner Mentoring & Co-Op State
+  const [stateHistory, setStateHistory] = useState<BoardState[]>([]);
+  const [pendingHintRequest, setPendingHintRequest] = useState<{ requesterName: string } | null>(null);
+  const [incomingHintMove, setIncomingHintMove] = useState<Move | null>(null);
+  const [hintMessage, setHintMessage] = useState<string | null>(null);
+  const [encouragingToast, setEncouragingToast] = useState<string | null>(null);
 
   // 1. Auto-save board FEN on every move to survive accidental refreshes
   useEffect(() => {
@@ -119,6 +126,7 @@ export const OnlineGameScreen: React.FC<OnlineGameScreenProps> = ({
 
         case 'MOVE':
           if (msg.senderId !== userId) {
+            setStateHistory(prev => [...prev, boardState]);
             const move: Move = {
               fromRow: msg.fromRow,
               fromCol: msg.fromCol,
@@ -128,6 +136,8 @@ export const OnlineGameScreen: React.FC<OnlineGameScreenProps> = ({
             };
             const { newState, result } = ChessEngine.makeMove(boardState, move);
             setBoardState(newState);
+            setIncomingHintMove(null);
+            setHintMessage(null);
 
             if (result?.status === 'CHECKMATE') {
               soundManager.playVictory();
@@ -137,6 +147,44 @@ export const OnlineGameScreen: React.FC<OnlineGameScreenProps> = ({
             } else if (result?.status === 'CHECK') {
               soundManager.playCheck();
             }
+          }
+          break;
+
+        case 'HINT_REQUEST':
+          if (msg.senderId !== userId) {
+            soundManager.playChatPop();
+            setPendingHintRequest({ requesterName: msg.senderName });
+            setEncouragingToast(`💖 ¡${msg.senderName} te ha pedido un consejo con amor!`);
+            setTimeout(() => setEncouragingToast(null), 5000);
+          }
+          break;
+
+        case 'HINT_RESPONSE':
+          if (msg.senderId !== userId) {
+            soundManager.playChatPop();
+            setIncomingHintMove({
+              fromRow: msg.fromRow,
+              fromCol: msg.fromCol,
+              toRow: msg.toRow,
+              toCol: msg.toCol,
+            });
+            setHintMessage(msg.message || 'Tu amor te sugiere esta jugada con cariño 💖');
+          }
+          break;
+
+        case 'TAKEBACK_REQUEST':
+          if (msg.senderId !== userId) {
+            soundManager.playChatPop();
+            setStateHistory(prev => {
+              if (prev.length > 0) {
+                const last = prev[prev.length - 1];
+                setBoardState(last);
+                return prev.slice(0, -1);
+              }
+              return prev;
+            });
+            setEncouragingToast(`🌹 ${partnerName} desizo la última jugada. ¡Aprender es volver a intentar juntos! 💖`);
+            setTimeout(() => setEncouragingToast(null), 4500);
           }
           break;
 
@@ -163,13 +211,14 @@ export const OnlineGameScreen: React.FC<OnlineGameScreenProps> = ({
           setTimeout(() => setFloatingReaction(null), 2500);
           break;
 
-
-
         case 'GAME_RESTART':
           sessionStorage.removeItem(`chesslove_board_fen_${roomCode}`);
           setBoardState(ChessEngine.createInitialState());
+          setStateHistory([]);
           setTeacherArrows([]);
           setTeacherHighlights([]);
+          setIncomingHintMove(null);
+          setHintMessage(null);
           setGameOverModal(null);
           break;
 
@@ -261,8 +310,11 @@ export const OnlineGameScreen: React.FC<OnlineGameScreenProps> = ({
   };
 
   const handleLocalMove = (move: Move) => {
+    setStateHistory(prev => [...prev, boardState]);
     const { newState, result } = ChessEngine.makeMove(boardState, move);
     setBoardState(newState);
+    setIncomingHintMove(null);
+    setHintMessage(null);
 
     // Broadcast move to partner
     mqtt.publish(roomTopic, {
@@ -283,6 +335,32 @@ export const OnlineGameScreen: React.FC<OnlineGameScreenProps> = ({
     } else if (result?.status === 'CHECK') {
       soundManager.playCheck();
     }
+  };
+
+  const handleRequestHint = () => {
+    mqtt.publish(roomTopic, {
+      type: 'HINT_REQUEST',
+      senderId: userId,
+      senderName: userName,
+    });
+    setEncouragingToast(`💌 Le has pedido un consejo a ${partnerName}...`);
+    setTimeout(() => setEncouragingToast(null), 4000);
+  };
+
+  const handleExecuteTakeback = () => {
+    if (stateHistory.length === 0) return;
+    const last = stateHistory[stateHistory.length - 1];
+    setBoardState(last);
+    setStateHistory(prev => prev.slice(0, -1));
+
+    mqtt.publish(roomTopic, {
+      type: 'TAKEBACK_REQUEST',
+      senderId: userId,
+      fen: ChessEngine.boardToFen(last),
+    });
+
+    setEncouragingToast('↩️ Has deshecho la última jugada. ¡Aprender es volver a intentar juntos! 💖');
+    setTimeout(() => setEncouragingToast(null), 4000);
   };
 
   const handleSendReaction = (emoji: string) => {
@@ -427,6 +505,59 @@ export const OnlineGameScreen: React.FC<OnlineGameScreenProps> = ({
         </div>
       )}
 
+      {/* Mentoring & Encouraging Toast Notification */}
+      {encouragingToast && (
+        <div
+          className="glass-panel"
+          style={{
+            padding: '8px 16px',
+            marginBottom: '10px',
+            backgroundColor: 'rgba(229, 115, 136, 0.22)',
+            border: '1px solid var(--rose-gold-primary)',
+            borderRadius: 'var(--radius-full)',
+            textAlign: 'center',
+            fontSize: '0.85rem',
+            fontWeight: 600,
+            color: '#FFFFFF',
+            boxShadow: '0 4px 12px rgba(229, 115, 136, 0.3)',
+            animation: 'fadeIn 0.2s ease',
+          }}
+        >
+          {encouragingToast}
+        </div>
+      )}
+
+      {/* Incoming Hint Suggestion Bubble */}
+      {hintMessage && (
+        <div
+          className="glass-panel"
+          style={{
+            padding: '10px 16px',
+            marginBottom: '10px',
+            backgroundColor: 'rgba(255, 209, 102, 0.16)',
+            border: '1px solid #FFD166',
+            borderRadius: 'var(--radius-md)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '8px',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Sparkles size={16} color="#FFD166" />
+            <span style={{ fontSize: '0.85rem', color: '#FFF', fontWeight: 600 }}>
+              {hintMessage}
+            </span>
+          </div>
+          <button
+            onClick={() => { setIncomingHintMove(null); setHintMessage(null); }}
+            style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '13px' }}
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
       {/* Turn & Status Bar */}
       <div
         className="glass-card"
@@ -484,6 +615,7 @@ export const OnlineGameScreen: React.FC<OnlineGameScreenProps> = ({
           onTeacherHighlight={handleTeacherHighlight}
           externalArrows={teacherArrows}
           externalHighlights={teacherHighlights}
+          hintMove={incomingHintMove}
         />
 
         {/* Floating Romantic Emoji Reaction Animation */}
@@ -508,6 +640,51 @@ export const OnlineGameScreen: React.FC<OnlineGameScreenProps> = ({
 
       {/* Quick Reactions Bar */}
       <QuickReactionsBar onSendReaction={handleSendReaction} />
+
+      {/* Co-Op Mentoring Actions (Pedir Consejo & Deshacer Jugada con Amor) */}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          marginTop: '12px',
+        }}
+      >
+        <button
+          onClick={handleRequestHint}
+          disabled={!isOpponentConnected}
+          className="btn-secondary"
+          style={{
+            flex: 1,
+            padding: '9px 12px',
+            fontSize: '0.82rem',
+            gap: '6px',
+            borderColor: 'var(--rose-gold-primary)',
+            color: 'var(--rose-gold-secondary)',
+          }}
+          title="Pide una pista amorosa a tu pareja cuando no sepas qué mover"
+        >
+          <HelpCircle size={15} />
+          <span>Pedir Consejo con Amor 💖</span>
+        </button>
+
+        {stateHistory.length > 0 && (
+          <button
+            onClick={handleExecuteTakeback}
+            className="btn-secondary"
+            style={{
+              padding: '9px 12px',
+              fontSize: '0.82rem',
+              gap: '6px',
+              color: 'var(--text-muted)',
+            }}
+            title="Deshaz la última jugada para aprender de los errores sin frustración"
+          >
+            <Undo2 size={15} />
+            <span>Deshacer con Amor</span>
+          </button>
+        )}
+      </div>
 
       {/* Teacher Tools & Game Controls */}
       <div

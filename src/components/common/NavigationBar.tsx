@@ -1,7 +1,7 @@
 import React from 'react';
 import { Home, Swords, GraduationCap, HeartHandshake, User } from 'lucide-react';
 
-export type ScreenTab = 'HOME' | 'ONLINE' | 'LOCAL' | 'AI' | 'LEARN' | 'STORY' | 'PROFILE';
+export type ScreenTab = 'HOME' | 'ONLINE' | 'LOCAL' | 'AI' | 'LEARN' | 'STORY' | 'PROFILE' | 'MINI_GAMES' | 'BESTIARY' | 'JOURNAL';
 
 interface NavigationBarProps {
   currentTab: ScreenTab;

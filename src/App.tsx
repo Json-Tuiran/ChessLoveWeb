@@ -7,6 +7,9 @@ import { LearnScreen } from './screens/LearnScreen';
 import { LearnLessonScreen } from './screens/LearnLessonScreen';
 import { OurStoryScreen } from './screens/OurStoryScreen';
 import { ProfileScreen } from './screens/ProfileScreen';
+import { MiniGamesScreen } from './screens/MiniGamesScreen';
+import { PieceBestiaryScreen } from './screens/PieceBestiaryScreen';
+import { LoveJournalScreen } from './screens/LoveJournalScreen';
 import { NavigationBar, ScreenTab } from './components/common/NavigationBar';
 import { FloatingChatBubble } from './components/chat/FloatingChatBubble';
 import { ChatDrawer, DisplayMessage } from './components/chat/ChatDrawer';
@@ -328,9 +331,30 @@ export const App: React.FC = () => {
         ) : (
           <LearnScreen
             onSelectLesson={setSelectedLesson}
+            onOpenBestiary={() => setCurrentTab('BESTIARY')}
+            onOpenMiniGames={() => setCurrentTab('MINI_GAMES')}
             onExit={() => setCurrentTab('HOME')}
           />
         )
+      )}
+
+      {currentTab === 'BESTIARY' && (
+        <PieceBestiaryScreen onBack={() => setCurrentTab('LEARN')} />
+      )}
+
+      {currentTab === 'MINI_GAMES' && (
+        <MiniGamesScreen
+          onBack={() => setCurrentTab('LEARN')}
+          partnerName={partnerName || 'Tu Pareja'}
+        />
+      )}
+
+      {currentTab === 'JOURNAL' && (
+        <LoveJournalScreen
+          userName={userName || 'Tú'}
+          partnerName={partnerName || 'Tu Pareja'}
+          onBack={() => setCurrentTab('PROFILE')}
+        />
       )}
 
       {currentTab === 'STORY' && (
@@ -348,6 +372,7 @@ export const App: React.FC = () => {
           coupleCode={coupleCode}
           onUpdateProfile={handleUpdateProfile}
           onLogout={handleLogout}
+          onOpenJournal={() => setCurrentTab('JOURNAL')}
           onExit={() => setCurrentTab('HOME')}
         />
       )}

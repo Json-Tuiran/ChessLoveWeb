@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import { BoardState, Move, Piece, PieceColor, PieceType, Position } from '../../engine/types';
 import { MoveGenerator } from '../../engine/MoveGenerator';
 import { soundManager } from '../../audio/SoundManager';
-import { BoardOverlay, OverlayArrow, OverlayHighlight } from './BoardOverlay';
+import { BoardOverlay, OverlayArrow, OverlayHighlight, OverlayTrail } from './BoardOverlay';
 import { PromotionModal } from './PromotionModal';
 
 interface ChessBoardProps {
@@ -216,6 +216,21 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
     });
   }
 
+  // Visual Movement Trails for beginners
+  const selectedPiece = selectedPos ? boardState.board[selectedPos.row][selectedPos.col] : null;
+  const visualTrails: OverlayTrail[] = [];
+  if (selectedPos && selectedPiece) {
+    for (const move of legalMovesForSelected) {
+      visualTrails.push({
+        fromRow: selectedPos.row,
+        fromCol: selectedPos.col,
+        toRow: move.toRow,
+        toCol: move.toCol,
+        pieceType: selectedPiece.type,
+      });
+    }
+  }
+
   // Find King in check position for check aura
   const inCheckKingPos = boardState.isInCheck ? MoveGenerator.findKing(boardState.board, boardState.currentTurn) : null;
 
@@ -380,6 +395,7 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
       <BoardOverlay
         arrows={combinedArrows}
         highlights={externalHighlights}
+        trails={visualTrails}
         flipped={flipped}
       />
 

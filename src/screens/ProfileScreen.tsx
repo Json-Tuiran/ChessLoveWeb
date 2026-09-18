@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowLeft, User, Heart, Volume2, VolumeX, Shield, Check, Copy, Sparkles, LogOut } from 'lucide-react';
+import { ArrowLeft, User, Heart, Volume2, VolumeX, Shield, Check, Copy, Sparkles, LogOut, BookHeart, ChevronRight } from 'lucide-react';
 import { soundManager } from '../audio/SoundManager';
 
 interface ProfileScreenProps {
@@ -8,6 +8,7 @@ interface ProfileScreenProps {
   coupleCode: string;
   onUpdateProfile: (name: string, partner: string, code: string) => void;
   onLogout: () => void;
+  onOpenJournal: () => void;
   onExit: () => void;
 }
 
@@ -17,6 +18,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
   coupleCode,
   onUpdateProfile,
   onLogout,
+  onOpenJournal,
   onExit,
 }) => {
   const [name, setName] = useState(userName);
@@ -80,6 +82,49 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
         </h2>
 
         <div style={{ width: '40px' }} />
+      </div>
+
+      {/* Diario de Amor & Hitos Link */}
+      <div
+        onClick={onOpenJournal}
+        className="glass-panel"
+        style={{
+          padding: '16px',
+          marginBottom: '16px',
+          cursor: 'pointer',
+          border: '1px solid var(--border-gold)',
+          background: 'linear-gradient(135deg, rgba(229, 115, 136, 0.16), rgba(38, 30, 42, 0.85))',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          transition: 'transform 0.2s ease',
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div
+            style={{
+              width: '42px',
+              height: '42px',
+              borderRadius: '50%',
+              backgroundColor: 'rgba(229, 115, 136, 0.25)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0,
+            }}
+          >
+            <BookHeart size={22} color="var(--rose-gold-primary)" />
+          </div>
+          <div>
+            <h4 style={{ fontSize: '0.98rem', color: '#FFFFFF', fontWeight: 700 }}>
+              Diario de Amor & Hitos 📖
+            </h4>
+            <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+              Ver los logros desbloqueados juntos y escribir dedicatorias
+            </p>
+          </div>
+        </div>
+        <ChevronRight size={18} color="var(--rose-gold-secondary)" />
       </div>
 
       <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>

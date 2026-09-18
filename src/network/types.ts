@@ -13,7 +13,11 @@ export type MqttMessageType =
   | 'PRESENCE_PING'
   | 'COUPLE_HANDSHAKE'
   | 'GAME_RESTART'
-  | 'RESIGN';
+  | 'RESIGN'
+  | 'HINT_REQUEST'
+  | 'HINT_RESPONSE'
+  | 'TAKEBACK_REQUEST'
+  | 'TAKEBACK_ACCEPT';
 
 export interface RoomAnnounceMessage {
   type: 'ROOM_ANNOUNCE';
@@ -114,6 +118,28 @@ export interface CoupleHandshakeMessage {
   timestamp: number;
 }
 
+export interface HintRequestMessage {
+  type: 'HINT_REQUEST';
+  senderId: string;
+  senderName: string;
+}
+
+export interface HintResponseMessage {
+  type: 'HINT_RESPONSE';
+  senderId: string;
+  fromRow: number;
+  fromCol: number;
+  toRow: number;
+  toCol: number;
+  message?: string;
+}
+
+export interface TakebackMessage {
+  type: 'TAKEBACK_REQUEST' | 'TAKEBACK_ACCEPT';
+  senderId: string;
+  fen?: string;
+}
+
 export type NetworkMessage =
   | RoomAnnounceMessage
   | JoinRequestMessage
@@ -126,4 +152,7 @@ export type NetworkMessage =
   | ReactionMessage
   | PresencePingMessage
   | CoupleHandshakeMessage
-  | GenericControlMessage;
+  | GenericControlMessage
+  | HintRequestMessage
+  | HintResponseMessage
+  | TakebackMessage;

@@ -1,4 +1,5 @@
 import React from 'react';
+import { PieceType } from '../../engine/types';
 
 export interface OverlayArrow {
   fromRow: number;
@@ -14,13 +15,22 @@ export interface OverlayHighlight {
   color?: string;
 }
 
+export interface OverlayTrail {
+  fromRow: number;
+  fromCol: number;
+  toRow: number;
+  toCol: number;
+  pieceType: PieceType;
+}
+
 interface BoardOverlayProps {
   arrows: OverlayArrow[];
   highlights: OverlayHighlight[];
+  trails?: OverlayTrail[];
   flipped?: boolean;
 }
 
-export const BoardOverlay: React.FC<BoardOverlayProps> = ({ arrows, highlights, flipped = false }) => {
+export const BoardOverlay: React.FC<BoardOverlayProps> = ({ arrows, highlights, trails = [], flipped = false }) => {
   const getSquareCenter = (row: number, col: number) => {
     const r = flipped ? 7 - row : row;
     const c = flipped ? 7 - col : col;
@@ -90,6 +100,50 @@ export const BoardOverlay: React.FC<BoardOverlayProps> = ({ arrows, highlights, 
             fill={hl.color || 'rgba(0, 109, 119, 0.45)'}
             rx="6"
             style={{ transition: 'fill 0.2s ease' }}
+          />
+        );
+      })}
+
+      {/* Movement Trails (Geometrical Paths) */}
+      {trails.map((trail, index) => {
+        const start = getSquareCenter(trail.fromRow, trail.fromCol);
+        const end = getSquareCenter(trail.toRow, trail.toCol);
+
+        if (trail.pieceType === 'KNIGHT') {
+          // L-Shape path calculation
+          const dy = Math.abs(trail.toRow - trail.fromRow);
+          const cornerRow = dy === 2 ? trail.toRow : trail.fromRow;
+          const cornerCol = dy === 2 ? trail.fromCol : trail.toCol;
+          const corner = getSquareCenter(cornerRow, cornerCol);
+
+          return (
+            <polyline
+              key={`trail-${index}`}
+              points={`${start.x},${start.y} ${corner.x},${corner.y} ${end.x},${end.y}`}
+              stroke="rgba(229, 115, 136, 0.78)"
+              strokeWidth="7"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              fill="none"
+              strokeDasharray="8 6"
+              style={{ filter: 'drop-shadow(0 0 5px rgba(229, 115, 136, 0.65))' }}
+            />
+          );
+        }
+
+        // Sliders & Pawns: Straight smooth trajectory
+        return (
+          <line
+            key={`trail-${index}`}
+            x1={start.x}
+            y1={start.y}
+            x2={end.x}
+            y2={end.y}
+            stroke="rgba(226, 149, 120, 0.65)"
+            strokeWidth="5"
+            strokeLinecap="round"
+            strokeDasharray="7 5"
+            style={{ filter: 'drop-shadow(0 0 4px rgba(226, 149, 120, 0.45))' }}
           />
         );
       })}
