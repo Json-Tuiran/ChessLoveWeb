@@ -1,0 +1,228 @@
+import { LevelCategory } from './types';
+
+export const LEARN_LEVELS: LevelCategory[] = [
+  {
+    level: 1,
+    title: 'Nivel 1: Conoce las Piezas',
+    description: 'Aprende los movimientos y el alma de cada integrante de la corte real.',
+    icon: '♟️',
+    lessons: [
+      {
+        id: 101,
+        level: 1,
+        levelTitle: 'Nivel 1: Conoce las Piezas',
+        title: 'El Valiente Peón 🌾',
+        subtitle: 'El primer paso hacia el destino',
+        storyIntro: 'El peón avanza paso a paso sin mirar atrás, pero cuando encuentra al rival en diagonal, desata su determinación.',
+        initialFen: '8/8/8/3p4/4P3/8/8/4K2k w - - 0 1',
+        targetMove: { fromRow: 4, fromCol: 4, toRow: 3, toCol: 3 }, // e4 captures d5
+        explanationOnSuccess: '¡Perfecto! El peón captura siempre en diagonal un paso adelante.',
+        hint: 'Toca tu peón blanco en e4 y captura al peón negro en diagonal.',
+      },
+      {
+        id: 102,
+        level: 1,
+        levelTitle: 'Nivel 1: Conoce las Piezas',
+        title: 'La Fiel Torre 🏰',
+        subtitle: 'Poderosas murallas y columnas abiertas',
+        storyIntro: 'La torre domina las líneas rectas con fuerza inquebrantable, proyectando su escudo a lo largo de todo el reino.',
+        initialFen: 'k7/8/8/8/8/8/8/R3K3 w - - 0 1',
+        targetMove: { fromRow: 7, fromCol: 0, toRow: 0, toCol: 0 }, // a1 to a8
+        explanationOnSuccess: '¡Excelente! La torre recorre filas y columnas enteras con decisión.',
+        hint: 'Avanza tu torre por toda la columna abierta hasta acorralar al rey en a8.',
+      },
+      {
+        id: 103,
+        level: 1,
+        levelTitle: 'Nivel 1: Conoce las Piezas',
+        title: 'El Ágil Caballo 🐎',
+        subtitle: 'El único capaz de saltar barreras',
+        storyIntro: 'Como el amor que supera cualquier obstáculo, el caballo salta por encima de otras piezas dibujando una elegante letra "L".',
+        initialFen: '8/8/4p3/8/8/5N2/8/4K2k w - - 0 1',
+        targetMove: { fromRow: 5, fromCol: 5, toRow: 3, toCol: 4 }, // f3 to e5
+        explanationOnSuccess: '¡Genial! Dos casillas adelante y una a un lado: ese es su salto inconfundible.',
+        hint: 'Salta con tu caballo hacia la casilla central e5.',
+      },
+      {
+        id: 104,
+        level: 1,
+        levelTitle: 'Nivel 1: Conoce las Piezas',
+        title: 'El Sabio Alfil 🏹',
+        subtitle: 'El francotirador de diagonales',
+        storyIntro: 'El alfil permanece fiel a su color original, deslizándose velozmente a través de las diagonales del tablero.',
+        initialFen: '8/7k/7p/8/8/8/8/2B1K3 w - - 0 1',
+        targetMove: { fromRow: 7, fromCol: 2, toRow: 2, toCol: 7 }, // c1 to h6
+        explanationOnSuccess: '¡Brillante! Las diagonales no tienen secretos para tu alfil.',
+        hint: 'Desliza tu alfil blanco por la gran diagonal hasta capturar en h6.',
+      },
+      {
+        id: 105,
+        level: 1,
+        levelTitle: 'Nivel 1: Conoce las Piezas',
+        title: 'La Soberana Dama 👑',
+        subtitle: 'La fuerza más temida y elegante',
+        storyIntro: 'Combina la libertad de la torre y la astucia del alfil. Su presencia en el tablero cambia el destino de cualquier batalla.',
+        initialFen: '3k4/8/3K4/8/8/8/8/3Q4 w - - 0 1',
+        targetMove: { fromRow: 7, fromCol: 3, toRow: 0, toCol: 3 }, // d1 to d8
+        explanationOnSuccess: '¡Jaque Mate Soberano! La dama domina todas las direcciones.',
+        hint: 'Asciende con tu Dama por la columna central d hasta dar mate en d8.',
+      },
+      {
+        id: 106,
+        level: 1,
+        levelTitle: 'Nivel 1: Conoce las Piezas',
+        title: 'El Noble Rey 💖',
+        subtitle: 'El corazón que da sentido al juego',
+        storyIntro: 'Paso a paso, el Rey custodia su corona. No puede moverse a casillas atacadas porque su seguridad es la máxima prioridad.',
+        initialFen: '8/8/8/8/8/8/4K3/7k w - - 0 1',
+        targetMove: { fromRow: 6, fromCol: 4, toRow: 5, toCol: 4 }, // e2 to e3
+        explanationOnSuccess: '¡Bien hecho! El rey da un paso seguro hacia adelante.',
+        hint: 'Mueve a tu Rey un paso al frente para ganar actividad.',
+      },
+    ],
+  },
+  {
+    level: 2,
+    title: 'Nivel 2: Tablero y Coordenadas',
+    description: 'Descubre el lenguaje secreto de casillas, diagonales y centro sagrado.',
+    icon: '🗺️',
+    lessons: [
+      {
+        id: 201,
+        level: 2,
+        levelTitle: 'Nivel 2: Tablero y Coordenadas',
+        title: 'La Apertura Clásica (e4) 🌱',
+        subtitle: 'El primer suspiro de la partida',
+        storyIntro: 'La casilla e4 es el epicentro de infinitas historias de ajedrez. Dominarla abre caminos para tu Dama y Alfil.',
+        initialFen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+        targetMove: { fromRow: 6, fromCol: 4, toRow: 4, toCol: 4 }, // e2 to e4
+        explanationOnSuccess: '¡Excelente apertura! Has liberado dos diagonales con un solo movimiento.',
+        hint: 'Avanza tu peón de rey dos casillas hasta e4.',
+      },
+      {
+        id: 202,
+        level: 2,
+        levelTitle: 'Nivel 2: Tablero y Coordenadas',
+        title: 'El Dúo Central (d4) ⚔️',
+        subtitle: 'Conquistando el corazón del reino',
+        storyIntro: 'Tener peones en e4 y d4 es el sueño de todo estratega: crea una barrera impenetrable en el centro.',
+        initialFen: 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 1',
+        targetMove: { fromRow: 6, fromCol: 3, toRow: 4, toCol: 3 }, // d2 to d4
+        explanationOnSuccess: '¡Centro dominado! Tus peones controlan las casillas más codiciadas.',
+        hint: 'Avanza el peón de dama dos casillas hacia d4 para acompañar a tu peón de e4.',
+      },
+      {
+        id: 203,
+        level: 2,
+        levelTitle: 'Nivel 2: Tablero y Coordenadas',
+        title: 'El Fianchetto Real (g2) ✨',
+        subtitle: 'La gran diagonal del infinito',
+        storyIntro: 'Colocar tu alfil en g2 tras mover g3 crea un centinela que vigila desde la distancia todo el flanco de dama rival.',
+        initialFen: 'rnbqkbnr/pppppppp/8/8/8/6P1/PPPPPP1P/RNBQKBNR w KQkq - 0 1',
+        targetMove: { fromRow: 7, fromCol: 5, toRow: 6, toCol: 6 }, // f1 to g2
+        explanationOnSuccess: '¡Fianchetto completado! El alfil mira a través de todo el horizonte.',
+        hint: 'Ubica tu alfil en la casilla g2.',
+      },
+    ],
+  },
+  {
+    level: 3,
+    title: 'Nivel 3: Reglas Especiales',
+    description: 'Coronación, enroque protector y escapes milagrosos.',
+    icon: '✨',
+    lessons: [
+      {
+        id: 301,
+        level: 3,
+        levelTitle: 'Nivel 3: Reglas Especiales',
+        title: 'La Coronación Triunfal 👑🌟',
+        subtitle: 'La recompensa a la perseverancia',
+        storyIntro: 'Cuando un humilde peón alcanza la octava fila, se transforma en la pieza más poderosa: la Dama.',
+        initialFen: '4k3/4P3/8/8/8/8/8/4K3 w - - 0 1',
+        targetMove: { fromRow: 1, fromCol: 4, toRow: 0, toCol: 4, promotionType: 'QUEEN' }, // e7 to e8=Q
+        explanationOnSuccess: '¡Has coronado una Dama! Un peón que nunca se rindió se convierte en realeza.',
+        hint: 'Avanza tu peón hasta e8 y corónalo como Dama.',
+      },
+      {
+        id: 302,
+        level: 3,
+        levelTitle: 'Nivel 3: Reglas Especiales',
+        title: 'El Enroque Refugio 🛡️',
+        subtitle: 'El abrazo entre el Rey y su Torre',
+        storyIntro: 'En un solo movimiento sincronizado, el Rey busca cobijo en la esquina mientras la Torre acude al combate.',
+        initialFen: 'r3k2r/8/8/8/8/8/8/R3K2R w KQkq - 0 1',
+        targetMove: { fromRow: 7, fromCol: 4, toRow: 7, toCol: 6 }, // e1 to g1 (Kingside)
+        explanationOnSuccess: '¡Enroque perfecto! Tu rey descansa seguro tras sus murallas.',
+        hint: 'Toma al Rey y muévelo dos pasos a la derecha hacia g1 para enrocar corto.',
+      },
+      {
+        id: 303,
+        level: 3,
+        levelTitle: 'Nivel 3: Reglas Especiales',
+        title: 'Escape del Jaque 🕊️',
+        subtitle: 'La serenidad ante el peligro',
+        storyIntro: 'Cuando el rey sufre un jaque, debe actuar de inmediato: escapar, bloquear el ataque o capturar al atacante.',
+        initialFen: '6k1/8/8/8/8/8/8/4K2r w - - 0 1',
+        targetMove: { fromRow: 7, fromCol: 4, toRow: 6, toCol: 3 }, // e1 to d2
+        explanationOnSuccess: '¡Rey a salvo! Escapar a tiempo preserva la vida de tu reino.',
+        hint: 'Mueve a tu rey hacia la casilla segura d2.',
+      },
+    ],
+  },
+  {
+    level: 4,
+    title: 'Nivel 4: Tácticas de Pareja',
+    description: 'Combinaciones románticas, tenedores, clavadas y el mítico Beso de la Muerte.',
+    icon: '🌹',
+    lessons: [
+      {
+        id: 401,
+        level: 4,
+        levelTitle: 'Nivel 4: Tácticas de Pareja',
+        title: 'El Tenedor del Amor 🔱',
+        subtitle: 'Ataque doble simultáneo',
+        storyIntro: 'El caballo ataca dos puntos a la vez. Cuando amenaza al rey y a otra pieza mayor, la victoria es inminente.',
+        initialFen: 'r2qk3/4pppp/8/3N4/8/8/PPPPPPPP/R1BQKBNR w KQ - 0 1',
+        targetMove: { fromRow: 3, fromCol: 3, toRow: 1, toCol: 2 }, // d5 to c7
+        explanationOnSuccess: '¡Tenedor letal! Jaque al rey y ataque decisivo a la torre y dama.',
+        hint: 'Salta con el caballo a c7 para dar jaque y amenazar a la corte rival.',
+      },
+      {
+        id: 402,
+        level: 4,
+        levelTitle: 'Nivel 4: Tácticas de Pareja',
+        title: 'La Clavada Absoluta 📌',
+        subtitle: 'Inmovilizados por la mirada de la Torre',
+        storyIntro: 'La dama rival está indefensa en la columna abierta frente a su rey: no puede huir sin exponerlo.',
+        initialFen: '4k3/4q3/8/8/8/8/8/4R1K1 w - - 0 1',
+        targetMove: { fromRow: 7, fromCol: 4, toRow: 1, toCol: 4 }, // e1 captures e7
+        explanationOnSuccess: '¡Dama capturada! La clavada paralizó al rival por completo.',
+        hint: 'Avanza tu torre por la columna e y captura a la dama en e7.',
+      },
+      {
+        id: 403,
+        level: 4,
+        levelTitle: 'Nivel 4: Tácticas de Pareja',
+        title: 'Mate del Pasillo 🚪🔒',
+        subtitle: 'Sin salida en la última fila',
+        storyIntro: 'Cuando los peones propios forman una muralla sin respiradero, la torre enemiga sentencia la partida desde el fondo.',
+        initialFen: '6k1/5ppp/8/8/8/8/8/3R2K1 w - - 0 1',
+        targetMove: { fromRow: 7, fromCol: 3, toRow: 0, toCol: 3 }, // d1 to d8
+        explanationOnSuccess: '¡Jaque Mate del Pasillo! Una clásica lección sobre la importancia de ventilar al rey.',
+        hint: 'Lleva tu torre hasta la casilla d8 en la última fila.',
+      },
+      {
+        id: 404,
+        level: 4,
+        levelTitle: 'Nivel 4: Tácticas de Pareja',
+        title: 'El Beso de la Muerte 💋🌹',
+        subtitle: 'La armonía táctica entre Dama y Alfil',
+        storyIntro: 'Dama y Alfil se coordinan como dos almas en sintonía. La dama se planta frente al rey con un beso de jaque mate protegido por su alfil.',
+        initialFen: 'r1b2rk1/pp3ppp/8/8/8/1B5Q/PP3PPP/R4RK1 w - - 0 1',
+        targetMove: { fromRow: 5, fromCol: 7, toRow: 1, toCol: 7 }, // h3 to h7
+        explanationOnSuccess: '¡Beso de la Muerte definitivo! La dama entrega el mate en h7 arropada por su alfil en b3.',
+        hint: 'Lanza a tu Dama a h7 junto al Rey enemigo.',
+      },
+    ],
+  },
+];

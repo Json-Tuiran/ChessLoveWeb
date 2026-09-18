@@ -1,0 +1,52 @@
+:root {
+  /* Paleta Principal Elegante / Romántica */
+  --rose-gold-primary: #E57388;
+  --rose-gold-light: #F4A7B9;
+  --rose-gold-dark: #C94C64;
+  --rose-gold-secondary: #D4A373;
+  --rose-gold-glow: rgba(229, 115, 136, 0.35);
+
+  --velvet-dark: #1A161E;
+  --velvet-card: #26202D;
+  --velvet-surface: #201B27;
+  --velvet-elevated: #2E2737;
+
+  /* Modos de Fondo */
+  --dark-background: #121016;
+  --dark-surface: #1C1822;
+  --dark-on-surface: #F3EDF7;
+  --text-muted: #A89EB0;
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-gold: rgba(212, 163, 115, 0.28);
+
+  /* Tablero de Ajedrez */
+  --board-light-square: #EDE0D4;
+  --board-dark-square: #7F5539;
+  --board-selected-square: rgba(229, 115, 136, 0.65);
+  --board-last-move-square: rgba(212, 163, 115, 0.45);
+  --board-legal-dot: rgba(74, 62, 61, 0.55);
+  --board-check-alert: rgba(229, 56, 59, 0.7);
+
+  /* Capa Pedagógica (Herramientas de Profesor) */
+  --education-arrow: #E29578;
+  --education-highlight: rgba(0, 109, 119, 0.55);
+  --education-danger: rgba(217, 4, 41, 0.55);
+  --education-success: rgba(82, 183, 136, 0.55);
+
+  /* Tipografía */
+  --font-family-primary: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-family-display: 'Playfair Display', Georgia, serif;
+
+  /* Sombras y Luces */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.6);
+  --shadow-glow: 0 0 25px var(--rose-gold-glow);
+
+  /* Radios */
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+  --radius-full: 9999px;
+}
