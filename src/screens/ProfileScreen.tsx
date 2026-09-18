@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowLeft, User, Heart, Volume2, VolumeX, Shield, Check, Copy, Sparkles } from 'lucide-react';
+import { ArrowLeft, User, Heart, Volume2, VolumeX, Shield, Check, Copy, Sparkles, LogOut } from 'lucide-react';
 import { soundManager } from '../audio/SoundManager';
 
 interface ProfileScreenProps {
@@ -7,6 +7,7 @@ interface ProfileScreenProps {
   partnerName: string;
   coupleCode: string;
   onUpdateProfile: (name: string, partner: string, code: string) => void;
+  onLogout: () => void;
   onExit: () => void;
 }
 
@@ -15,6 +16,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
   partnerName,
   coupleCode,
   onUpdateProfile,
+  onLogout,
   onExit,
 }) => {
   const [name, setName] = useState(userName);
@@ -41,6 +43,15 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
     const next = !soundEnabled;
     setSoundEnabled(next);
     soundManager.setEnabled(next);
+  };
+
+  const handleLogoutClick = () => {
+    const confirmed = window.confirm(
+      '¿Deseas cerrar sesión y desvincular la cuenta actual?\n\nAl hacerlo podrás ingresar con un nuevo nombre o utilizar otro código de emparejamiento para jugar con otra pareja.'
+    );
+    if (confirmed) {
+      onLogout();
+    }
   };
 
   return (
@@ -205,6 +216,52 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
           <Sparkles size={18} />
           <span>{savedSuccess ? '¡Cambios Guardados con Amor! 💖' : 'Guardar Cambios'}</span>
         </button>
+
+        {/* Separator */}
+        <div style={{ height: '1px', backgroundColor: 'var(--border-subtle)', margin: '8px 0' }} />
+
+        {/* Logout / Unpair Account Card */}
+        <div
+          className="glass-panel"
+          style={{
+            padding: '18px',
+            border: '1px solid rgba(229, 56, 59, 0.4)',
+            backgroundColor: 'rgba(229, 56, 59, 0.06)',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+            <LogOut size={18} color="var(--education-danger)" />
+            <h3 style={{ fontSize: '0.95rem', color: '#FFFFFF', fontWeight: 600 }}>
+              Cerrar Sesión o Cambiar Pareja
+            </h3>
+          </div>
+          <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '14px', lineHeight: 1.5 }}>
+            ¿Creaste la cuenta por error o deseas ingresar otro Código de Emparejamiento? Al cerrar sesión volverás a la pantalla de bienvenida para ingresar con otra clave o apodo.
+          </p>
+          <button
+            type="button"
+            onClick={handleLogoutClick}
+            style={{
+              width: '100%',
+              padding: '11px',
+              borderRadius: 'var(--radius-md)',
+              border: '1px solid var(--education-danger)',
+              backgroundColor: 'rgba(229, 56, 59, 0.15)',
+              color: '#FF6B6B',
+              fontWeight: 600,
+              fontSize: '0.88rem',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+            }}
+          >
+            <LogOut size={16} />
+            <span>Cerrar Sesión / Desvincular Cuenta</span>
+          </button>
+        </div>
       </form>
     </div>
   );

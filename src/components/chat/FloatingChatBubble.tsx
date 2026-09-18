@@ -103,6 +103,7 @@ export const FloatingChatBubble: React.FC<FloatingChatBubbleProps> = ({
 
     const handleTouchMove = (e: TouchEvent) => {
       if (e.touches.length !== 1) return;
+      if (e.cancelable) e.preventDefault();
       const touch = e.touches[0];
       const dx = touch.clientX - dragStartRef.current.startX;
       const dy = touch.clientY - dragStartRef.current.startY;

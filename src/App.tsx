@@ -95,25 +95,28 @@ export const App: React.FC = () => {
 
       // Secure Chat messages
       if (msg.type === 'SECURE_CHAT_MESSAGE') {
+        // Sender already added their own message optimistically in handleSendMessage
+        if (msg.senderId === userId) return;
+
         try {
           const decrypted = await CoupleCrypto.decrypt<ChatContent>(msg.iv, msg.cipher, coupleCode);
-          const isSelf = msg.senderId === userId;
           const newMsg: DisplayMessage = {
             id: msg.msgId,
             senderId: msg.senderId,
             senderName: msg.senderName,
             content: decrypted,
             timestamp: msg.timestamp,
-            isSelf,
+            isSelf: false,
           };
 
-          setMessages(prev => [...prev, newMsg]);
+          setMessages(prev => {
+            if (prev.some(m => m.id === msg.msgId)) return prev;
+            return [...prev, newMsg];
+          });
 
-          if (!isSelf) {
-            soundManager.playChatPop();
-            if (!isChatOpen) {
-              setUnreadCount(prev => prev + 1);
-            }
+          soundManager.playChatPop();
+          if (!isChatOpen) {
+            setUnreadCount(prev => prev + 1);
           }
         } catch (err) {
           console.error('Error decrypting incoming chat:', err);
@@ -192,20 +195,39 @@ export const App: React.FC = () => {
         timestamp,
       });
 
-      setMessages(prev => [
-        ...prev,
-        {
-          id: msgId,
-          senderId: userId,
-          senderName: userName,
-          content,
-          timestamp,
-          isSelf: true,
-        },
-      ]);
+      setMessages(prev => {
+        if (prev.some(m => m.id === msgId)) return prev;
+        return [
+          ...prev,
+          {
+            id: msgId,
+            senderId: userId,
+            senderName: userName,
+            content,
+            timestamp,
+            isSelf: true,
+          },
+        ];
+      });
     } catch (err) {
       console.error('Failed to send encrypted chat message:', err);
     }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('chesslove_user_name');
+    localStorage.removeItem('chesslove_partner_name');
+    localStorage.removeItem('chesslove_couple_code');
+    localStorage.removeItem('chesslove_online_fen');
+    localStorage.removeItem('chesslove_local_fen');
+    localStorage.removeItem('chesslove_ai_fen');
+    sessionStorage.clear();
+    setUserName('');
+    setPartnerName('');
+    setCoupleCode('');
+    setOnlineRoomCode('');
+    setMessages([]);
+    setCurrentTab('HOME');
   };
 
   const handleUpdateProfile = (name: string, partner: string, code: string) => {
@@ -325,6 +347,7 @@ export const App: React.FC = () => {
           partnerName={partnerName}
           coupleCode={coupleCode}
           onUpdateProfile={handleUpdateProfile}
+          onLogout={handleLogout}
           onExit={() => setCurrentTab('HOME')}
         />
       )}

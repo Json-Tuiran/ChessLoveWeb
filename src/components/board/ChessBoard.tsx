@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { BoardState, Move, Piece, PieceColor, PieceType, Position } from '../../engine/types';
 import { MoveGenerator } from '../../engine/MoveGenerator';
 import { soundManager } from '../../audio/SoundManager';
@@ -150,6 +150,60 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
     }
   };
 
+  // Mobile Touch Sliding / Dragging
+  const touchStartPosRef = useRef<{ row: number; col: number } | null>(null);
+
+  const handleTouchStartSquare = (row: number, col: number) => {
+    if (!interactive || !isPlayerTurn) return;
+    touchStartPosRef.current = { row, col };
+    const piece = boardState.board[row][col];
+    if (piece && piece.color === boardState.currentTurn) {
+      selectPiece(row, col);
+    }
+  };
+
+  const handleTouchEndSquare = (e: React.TouchEvent) => {
+    if (!interactive || !isPlayerTurn || !touchStartPosRef.current) return;
+    const startPos = touchStartPosRef.current;
+    touchStartPosRef.current = null;
+
+    if (e.changedTouches.length === 0) return;
+    const touch = e.changedTouches[0];
+    const targetEl = document.elementFromPoint(touch.clientX, touch.clientY);
+    const sqEl = targetEl?.closest('[data-square]');
+    if (!sqEl) return;
+
+    const toRowStr = sqEl.getAttribute('data-row');
+    const toColStr = sqEl.getAttribute('data-col');
+    if (toRowStr === null || toColStr === null) return;
+
+    const toRow = parseInt(toRowStr, 10);
+    const toCol = parseInt(toColStr, 10);
+
+    // If dragged to a DIFFERENT square
+    if (toRow !== startPos.row || toCol !== startPos.col) {
+      const allLegalMoves = MoveGenerator.generateLegalMoves(boardState);
+      const pieceMoves = allLegalMoves.filter(m => m.fromRow === startPos.row && m.fromCol === startPos.col);
+      const destinationMove = pieceMoves.find(m => m.toRow === toRow && m.toCol === toCol);
+
+      if (destinationMove) {
+        const movingPiece = boardState.board[startPos.row][startPos.col];
+        const isPromotion =
+          movingPiece?.type === 'PAWN' &&
+          ((movingPiece.color === 'WHITE' && toRow === 0) || (movingPiece.color === 'BLACK' && toRow === 7));
+
+        if (isPromotion) {
+          setPendingPromotionMove(destinationMove);
+          return;
+        }
+
+        executeMove(destinationMove);
+        setSelectedPos(null);
+        setLegalMovesForSelected([]);
+      }
+    }
+  };
+
   // Build combined arrows (external + hint)
   const combinedArrows: OverlayArrow[] = [...externalArrows];
   if (hintMove) {
@@ -177,6 +231,7 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
         boxShadow: '0 12px 36px rgba(0, 0, 0, 0.6), 0 0 0 3px var(--border-gold)',
         overflow: 'hidden',
         background: 'var(--velvet-dark)',
+        touchAction: 'none',
       }}
     >
       {/* 8x8 Grid */}
@@ -224,6 +279,8 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
                 data-col={col}
                 data-square={`sq-${row}-${col}`}
                 onClick={() => handleSquareClick(row, col)}
+                onTouchStart={() => handleTouchStartSquare(row, col)}
+                onTouchEnd={handleTouchEndSquare}
                 style={{
                   position: 'relative',
                   backgroundColor: bgColor,
