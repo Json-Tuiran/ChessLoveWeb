@@ -13,12 +13,13 @@ export class CoupleCrypto {
       return this.cachedKey;
     }
 
-    if (!window.crypto || !window.crypto.subtle) {
+    const cryptoObj = typeof window !== 'undefined' ? window.crypto : globalThis.crypto;
+    if (!cryptoObj || !cryptoObj.subtle) {
       throw new Error('Web Crypto API no disponible en este entorno');
     }
 
     const enc = new TextEncoder();
-    const rawKeyMaterial = await window.crypto.subtle.importKey(
+    const rawKeyMaterial = await cryptoObj.subtle.importKey(
       'raw',
       enc.encode(normalizedCode),
       { name: 'PBKDF2' },
@@ -26,7 +27,7 @@ export class CoupleCrypto {
       ['deriveKey']
     );
 
-    const derivedKey = await window.crypto.subtle.deriveKey(
+    const derivedKey = await cryptoObj.subtle.deriveKey(
       {
         name: 'PBKDF2',
         salt: this.SALT,
@@ -47,11 +48,12 @@ export class CoupleCrypto {
   // Encrypt any JSON-serializable payload
   public static async encrypt(data: unknown, coupleCode: string): Promise<{ iv: string; cipher: string }> {
     try {
+      const cryptoObj = typeof window !== 'undefined' ? window.crypto : globalThis.crypto;
       const key = await this.getKey(coupleCode);
-      const iv = window.crypto.getRandomValues(new Uint8Array(12));
+      const iv = cryptoObj.getRandomValues(new Uint8Array(12));
       const encodedData = new TextEncoder().encode(JSON.stringify(data));
 
-      const ciphertext = await window.crypto.subtle.encrypt(
+      const ciphertext = await cryptoObj.subtle.encrypt(
         {
           name: 'AES-GCM',
           iv: iv,
@@ -77,6 +79,7 @@ export class CoupleCrypto {
   // Decrypt payload back to original JavaScript object
   public static async decrypt<T = unknown>(ivBase64: string, cipherBase64: string, coupleCode: string): Promise<T> {
     try {
+      const cryptoObj = typeof window !== 'undefined' ? window.crypto : globalThis.crypto;
       const key = await this.getKey(coupleCode);
 
       const iv = new Uint8Array(
@@ -91,7 +94,7 @@ export class CoupleCrypto {
           .map(char => char.charCodeAt(0))
       );
 
-      const decryptedBuffer = await window.crypto.subtle.decrypt(
+      const decryptedBuffer = await cryptoObj.subtle.decrypt(
         {
           name: 'AES-GCM',
           iv: iv,
