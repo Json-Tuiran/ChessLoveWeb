@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import confetti from 'canvas-confetti';
 import { ArrowLeft, RotateCcw, Lightbulb, Bot, Sparkles, Volume2, VolumeX } from 'lucide-react';
 import { BoardState, Move, PieceColor } from '../engine/types';
@@ -12,12 +12,41 @@ interface AiGameScreenProps {
 }
 
 export const AiGameScreen: React.FC<AiGameScreenProps> = ({ onExit }) => {
-  const [boardState, setBoardState] = useState<BoardState>(ChessEngine.createInitialState());
+  const [boardState, setBoardState] = useState<BoardState>(() => {
+    try {
+      const savedFen = sessionStorage.getItem('chesslove_ai_game_fen');
+      if (savedFen) {
+        return ChessEngine.fenToBoard(savedFen);
+      }
+    } catch {}
+    return ChessEngine.createInitialState();
+  });
   const [difficulty, setDifficulty] = useState<AIDifficulty>('EASY');
   const [isAiThinking, setIsAiThinking] = useState(false);
   const [hint, setHint] = useState<{ move: Move; message: string } | null>(null);
   const [soundEnabled, setSoundEnabled] = useState(soundManager.enabled);
   const [gameOverModal, setGameOverModal] = useState<{ title: string; subtitle: string } | null>(null);
+
+  // Auto-save AI match FEN on every move
+  useEffect(() => {
+    try {
+      const fen = ChessEngine.boardToFen(boardState);
+      sessionStorage.setItem('chesslove_ai_game_fen', fen);
+    } catch {}
+  }, [boardState]);
+
+  // Accidental reload protection
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (!gameOverModal) {
+        e.preventDefault();
+        e.returnValue = 'Tienes una partida activa contra la IA. ¿Seguro que deseas salir o recargar?';
+        return e.returnValue;
+      }
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [gameOverModal]);
 
   const playerColor: PieceColor = 'WHITE';
   const isPlayerTurn = boardState.currentTurn === playerColor;
@@ -95,10 +124,16 @@ export const AiGameScreen: React.FC<AiGameScreenProps> = ({ onExit }) => {
   };
 
   const handleRestart = () => {
+    sessionStorage.removeItem('chesslove_ai_game_fen');
     setBoardState(ChessEngine.createInitialState());
     setHint(null);
     setIsAiThinking(false);
     setGameOverModal(null);
+  };
+
+  const handleExitGame = () => {
+    sessionStorage.removeItem('chesslove_ai_game_fen');
+    onExit();
   };
 
   return (
@@ -106,7 +141,7 @@ export const AiGameScreen: React.FC<AiGameScreenProps> = ({ onExit }) => {
       {/* Top Controls */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
         <button
-          onClick={onExit}
+          onClick={handleExitGame}
           style={{
             background: 'none',
             border: 'none',
@@ -319,7 +354,7 @@ export const AiGameScreen: React.FC<AiGameScreenProps> = ({ onExit }) => {
                 <RotateCcw size={16} />
                 <span>Jugar Otra Vez</span>
               </button>
-              <button onClick={onExit} className="btn-secondary" style={{ width: '100%' }}>
+              <button onClick={handleExitGame} className="btn-secondary" style={{ width: '100%' }}>
                 Volver al Menú
               </button>
             </div>

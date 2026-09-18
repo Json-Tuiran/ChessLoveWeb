@@ -34,10 +34,34 @@ export const App: React.FC = () => {
     return id;
   });
 
-  // 2. Navigation State
-  const [currentTab, setCurrentTab] = useState<ScreenTab>('HOME');
-  const [onlineRoomCode, setOnlineRoomCode] = useState<string>(coupleCode || 'AMOR-24');
-  const [isHost, setIsHost] = useState<boolean>(true);
+  // 2. Navigation State with Auto-Resume for active online rooms
+  const savedOnlineSession = (() => {
+    try {
+      const raw = sessionStorage.getItem('chesslove_active_online_session');
+      return raw ? JSON.parse(raw) : null;
+    } catch {
+      return null;
+    }
+  })();
+
+  const [currentTab, setCurrentTab] = useState<ScreenTab>(() => {
+    if (savedOnlineSession?.roomCode) {
+      return 'ONLINE';
+    }
+    return 'HOME';
+  });
+  const [onlineRoomCode, setOnlineRoomCode] = useState<string>(() => {
+    if (savedOnlineSession?.roomCode) {
+      return savedOnlineSession.roomCode;
+    }
+    return coupleCode || 'AMOR-24';
+  });
+  const [isHost, setIsHost] = useState<boolean>(() => {
+    if (savedOnlineSession) {
+      return !!savedOnlineSession.isHost;
+    }
+    return true;
+  });
   const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null);
 
   // 3. Network & Presence State
@@ -201,12 +225,19 @@ export const App: React.FC = () => {
     setOnlineRoomCode(codeToUse);
     setIsHost(true);
     setCurrentTab('ONLINE');
+    sessionStorage.setItem('chesslove_active_online_session', JSON.stringify({ roomCode: codeToUse, isHost: true }));
   };
 
   const handleJoinOnlineRoom = (code: string) => {
     setOnlineRoomCode(code);
     setIsHost(false);
     setCurrentTab('ONLINE');
+    sessionStorage.setItem('chesslove_active_online_session', JSON.stringify({ roomCode: code, isHost: false }));
+  };
+
+  const handleExitOnlineGame = () => {
+    sessionStorage.removeItem('chesslove_active_online_session');
+    setCurrentTab('HOME');
   };
 
   // Find next lesson helper
@@ -249,7 +280,7 @@ export const App: React.FC = () => {
           userName={userName || 'Tú'}
           partnerName={partnerName || 'Tu Pareja'}
           mqtt={mqtt}
-          onExit={() => setCurrentTab('HOME')}
+          onExit={handleExitOnlineGame}
         />
       )}
 

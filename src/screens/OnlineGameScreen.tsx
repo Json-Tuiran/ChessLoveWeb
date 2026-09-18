@@ -31,7 +31,17 @@ export const OnlineGameScreen: React.FC<OnlineGameScreenProps> = ({
   mqtt,
   onExit,
 }) => {
-  const [boardState, setBoardState] = useState<BoardState>(ChessEngine.createInitialState());
+  const [boardState, setBoardState] = useState<BoardState>(() => {
+    try {
+      const savedFen = sessionStorage.getItem(`chesslove_board_fen_${roomCode}`);
+      if (savedFen) {
+        return ChessEngine.fenToBoard(savedFen);
+      }
+    } catch (e) {
+      console.warn('Failed to restore board FEN from session:', e);
+    }
+    return ChessEngine.createInitialState();
+  });
   const [playerColor, setPlayerColor] = useState<PieceColor>(isHost ? 'WHITE' : 'BLACK');
   const [isOpponentConnected, setIsOpponentConnected] = useState(false);
   const [teacherMode, setTeacherMode] = useState(false);
@@ -40,13 +50,32 @@ export const OnlineGameScreen: React.FC<OnlineGameScreenProps> = ({
   const [teacherHighlights, setTeacherHighlights] = useState<OverlayHighlight[]>([]);
   const [floatingReaction, setFloatingReaction] = useState<string | null>(null);
 
-
-
   // Sound preference
   const [soundEnabled, setSoundEnabled] = useState(soundManager.enabled);
 
   // Game over state
   const [gameOverModal, setGameOverModal] = useState<{ title: string; subtitle: string; winner?: string } | null>(null);
+
+  // 1. Auto-save board FEN on every move to survive accidental refreshes
+  useEffect(() => {
+    try {
+      const fen = ChessEngine.boardToFen(boardState);
+      sessionStorage.setItem(`chesslove_board_fen_${roomCode}`, fen);
+    } catch (e) {}
+  }, [boardState, roomCode]);
+
+  // 2. Accidental refresh protection (beforeunload prompt)
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (!gameOverModal) {
+        e.preventDefault();
+        e.returnValue = 'Tienes una partida de ajedrez en curso con tu pareja 🌹. ¿Seguro que deseas salir o recargar?';
+        return e.returnValue;
+      }
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [gameOverModal]);
 
   const roomTopic = `chesslove/room/${roomCode}`;
 
@@ -137,6 +166,7 @@ export const OnlineGameScreen: React.FC<OnlineGameScreenProps> = ({
 
 
         case 'GAME_RESTART':
+          sessionStorage.removeItem(`chesslove_board_fen_${roomCode}`);
           setBoardState(ChessEngine.createInitialState());
           setTeacherArrows([]);
           setTeacherHighlights([]);
@@ -310,12 +340,18 @@ export const OnlineGameScreen: React.FC<OnlineGameScreenProps> = ({
   };
 
   const handleRestartGame = () => {
+    sessionStorage.removeItem(`chesslove_board_fen_${roomCode}`);
     mqtt.publish(roomTopic, {
       type: 'GAME_RESTART',
       senderId: userId,
     });
     setBoardState(ChessEngine.createInitialState());
     setGameOverModal(null);
+  };
+
+  const handleExitGame = () => {
+    sessionStorage.removeItem(`chesslove_board_fen_${roomCode}`);
+    onExit();
   };
 
   const isMyTurn = boardState.currentTurn === playerColor;
@@ -325,7 +361,7 @@ export const OnlineGameScreen: React.FC<OnlineGameScreenProps> = ({
       {/* Top Header Controls */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
         <button
-          onClick={onExit}
+          onClick={handleExitGame}
           style={{
             background: 'none',
             border: 'none',
@@ -576,7 +612,7 @@ export const OnlineGameScreen: React.FC<OnlineGameScreenProps> = ({
                 <RotateCcw size={16} />
                 <span>Jugar Otra Partida Juntos</span>
               </button>
-              <button onClick={onExit} className="btn-secondary" style={{ width: '100%' }}>
+              <button onClick={handleExitGame} className="btn-secondary" style={{ width: '100%' }}>
                 Volver al Menú Principal
               </button>
             </div>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import confetti from 'canvas-confetti';
 import { ArrowLeft, RotateCcw, Volume2, VolumeX, Sparkles, Smartphone } from 'lucide-react';
 import { BoardState, Move } from '../engine/types';
@@ -15,11 +15,40 @@ interface LocalGameScreenProps {
 }
 
 export const LocalGameScreen: React.FC<LocalGameScreenProps> = ({ userName, partnerName, onExit }) => {
-  const [boardState, setBoardState] = useState<BoardState>(ChessEngine.createInitialState());
+  const [boardState, setBoardState] = useState<BoardState>(() => {
+    try {
+      const savedFen = sessionStorage.getItem('chesslove_local_game_fen');
+      if (savedFen) {
+        return ChessEngine.fenToBoard(savedFen);
+      }
+    } catch {}
+    return ChessEngine.createInitialState();
+  });
   const [history, setHistory] = useState<BoardState[]>([]);
   const [autoFlip, setAutoFlip] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(soundManager.enabled);
   const [gameOverModal, setGameOverModal] = useState<{ title: string; subtitle: string } | null>(null);
+
+  // Auto-save local match on every move
+  useEffect(() => {
+    try {
+      const fen = ChessEngine.boardToFen(boardState);
+      sessionStorage.setItem('chesslove_local_game_fen', fen);
+    } catch {}
+  }, [boardState]);
+
+  // Accidental reload protection
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (!gameOverModal) {
+        e.preventDefault();
+        e.returnValue = 'Tienes una partida local en curso. ¿Seguro que deseas salir o recargar?';
+        return e.returnValue;
+      }
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [gameOverModal]);
 
   const handleMakeMove = (move: Move) => {
     setHistory(prev => [...prev, ChessEngine.cloneState(boardState)]);
@@ -68,9 +97,15 @@ export const LocalGameScreen: React.FC<LocalGameScreenProps> = ({ userName, part
   };
 
   const handleRestart = () => {
+    sessionStorage.removeItem('chesslove_local_game_fen');
     setBoardState(ChessEngine.createInitialState());
     setHistory([]);
     setGameOverModal(null);
+  };
+
+  const handleExitGame = () => {
+    sessionStorage.removeItem('chesslove_local_game_fen');
+    onExit();
   };
 
   const isWhiteTurn = boardState.currentTurn === 'WHITE';
@@ -82,7 +117,7 @@ export const LocalGameScreen: React.FC<LocalGameScreenProps> = ({ userName, part
       {/* Top Bar */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
         <button
-          onClick={onExit}
+          onClick={handleExitGame}
           style={{
             background: 'none',
             border: 'none',
@@ -252,7 +287,7 @@ export const LocalGameScreen: React.FC<LocalGameScreenProps> = ({ userName, part
                 <RotateCcw size={16} />
                 <span>Jugar Otra Partida</span>
               </button>
-              <button onClick={onExit} className="btn-secondary" style={{ width: '100%' }}>
+              <button onClick={handleExitGame} className="btn-secondary" style={{ width: '100%' }}>
                 Volver al Menú
               </button>
             </div>
